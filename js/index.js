@@ -8,21 +8,27 @@
         self.JQElement.on('selectstart select dragstart',function(){return false;});
         self.JQElement.children('*').on('selectstart select dragstart',function(){ return false;});
         self.JQElement.on("mousedown touchstart",function(e){
+            $(this).addClass("box-grabbing");
             if(e.touches){
-                var startX=e.touches[0].clientX-self.Position.X;
-                var startX=e.touches[0].clientY-self.Position.Y;
+                var startX=e.targetTouches[0].clientX-self.Position.X;
+                var startY=e.targetTouches[0].clientY-self.Position.Y;
             }
             else{
                 var startX=e.clientX-self.Position.X;
                 var startY=e.clientY-self.Position.Y;
             }
-            $(this).addClass("box-grabbing");
             $(document).on('mousemove touchmove',function(e){
-                $(this).addClass("box-grabbing");
-                self.Position.X=e.clientX-startX;
-                self.Position.Y=e.clientY-startY;
+                var event;
+                if(e.touches){
+                    e.preventDefault();
+                    event=e.targetTouches[0];
+                }
+                else{
+                    event=e;
+                }
+                self.Position.X=event.clientX-startX;
+                self.Position.Y=event.clientY-startY;
                 self.JQElement.css("transform",'translate(-50%,-50%) rotateX('+-Math.floor(self.Position.Y/2)+'deg) rotateY('+Math.floor(self.Position.X/2)+'deg)');
-                
             });
         });
         $(document).on("mouseup mouseleave",function(e){
