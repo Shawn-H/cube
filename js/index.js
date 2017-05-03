@@ -1,66 +1,72 @@
 !function(jQuery,window,document){
     function Box(JQelement){
         this.Position={'X':0,'Y':0,'Z':0};
-        this.offsetXY={oX:0,oY:0,oZ:0};
         this.JQElement=JQelement;
     }
-    
     Box.prototype.init=function(){
         var self=this;
-        self.JQElement.on('selectstart select',function(){return false;});
-        self.JQElement.children('*').on('selectstart select',function(){ return false;});
-        self.JQElement.on("mousedown",function(e){
-            var startX=e.clientX;
-            var startY=e.clientY;
-            var currentRotate
+        self.JQElement.on('selectstart select dragstart',function(){return false;});
+        self.JQElement.children('*').on('selectstart select dragstart',function(){ return false;});
+        self.JQElement.on("mousedown touchstart",function(e){
+            if(e.touches){
+                var startX=e.touches[0].clientX-self.Position.X;
+                var startX=e.touches[0].clientY-self.Position.Y;
+            }
+            else{
+                var startX=e.clientX-self.Position.X;
+                var startY=e.clientY-self.Position.Y;
+            }
             $(this).addClass("box-grabbing");
-            $(document).on('mousemove',function(e){
-                self.setNewPoistion(e,startX,startY);
+            $(document).on('mousemove touchmove',function(e){
+                $(this).addClass("box-grabbing");
+                self.Position.X=e.clientX-startX;
+                self.Position.Y=e.clientY-startY;
+                self.JQElement.css("transform",'translate(-50%,-50%) rotateX('+-Math.floor(self.Position.Y/2)+'deg) rotateY('+Math.floor(self.Position.X/2)+'deg)');
+                
             });
         });
-        $(document).on("mouseup",function(){
-            self.Position.X+=self.offsetXY.oX;
-            self.Position.Y+=self.offsetXY.oY;
+        $(document).on("mouseup mouseleave",function(e){
             self.JQElement.removeClass("box-grabbing");
-            $(document).unbind('mousemove');
+            $(this).removeClass("box-grabbing");
+            $(document).unbind("mousemove");
+            $(document).unbind("touchmove");
         });
-        console.log(self.getTransform());
     }
-//    新位置
-    Box.prototype.setNewPoistion=function(e,startX,startY){
-        this.offsetXY={
-            oX:Math.floor((e.clientX-startX)/2),
-            oY:Math.floor((e.clientY-startY)/2)
-        };
-        this.JQElement.css("transform",'translate(-50%,-50%) rotateY('+(this.Position.X+this.offsetXY.oX)+'deg) rotateX('+-(this.Position.Y+this.offsetXY.oY)+'deg)');
-        
-            
-    }
-    Box.prototype.getTransform=function(){
-        var str=this.JQElement.css('transform');
-        return str;
+    
+    Box.prototype.rotate=function(p,vTime){
+        var self=this;
+        var speed=vTime/p.x;
+        clearInterval(period1);
+        clearInterval(period2);
+        var period1=setInterval(function(){
+            if(self.Position.X==p.x){
+                clearInterval(period1);
+            }
+            else{
+                if(self.Position.X>0)
+                    self.Position.X-=1;
+                else
+                    self.Position.X+=1;
+                self.JQElement.css("transform",'translate(-50%,-50%) rotateX('+-Math.floor(self.Position.Y/2)+'deg) rotateY('+Math.floor(self.Position.X/2)+'deg)');
+            }
+            console.log(self.Position);
+        },speed);
+        var period2=setInterval(function(){
+            if(self.Position.Y==p.y){
+                clearInterval(period2);
+            }
+            else{
+                if(self.Position.Y>0)
+                    self.Position.Y-=1;
+                else
+                    self.Position.Y+=1;
+                self.JQElement.css("transform",'translate(-50%,-50%) rotateX('+-Math.floor(self.Position.Y/2)+'deg) rotateY('+Math.floor(self.Position.X/2)+'deg)');
+            }
+            console.log(self.Position);
+        },speed);
     }
     
     
     var oBox=new Box($(".box"));
     oBox.init();
-    $(".buttonGroup>button").on("mousedown",function(){
-        $(this).addClass("buttonOn");
-        var str=$(this).html();
-//        if(str=='前'){
-//        }else if(str=='后'){
-//            
-//        }else if(str=='左'){
-//            
-//        }else if(str=='右'){
-//            
-//        }else if(str=='顶'){
-//            
-//        }else if(str=='底'){
-//            
-//        }
-    });
-    $(".buttonGroup>button").on("mouseup",function(){
-        $(this).removeClass("buttonOn");
-    });
 }(jQuery,window,document);
