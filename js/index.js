@@ -27,46 +27,12 @@
         });
         $(document).on("mouseup mouseleave",function(e){
             self.JQElement.removeClass("box-grabbing");
-            $(this).removeClass("box-grabbing");
             $(document).unbind("mousemove");
             $(document).unbind("touchmove");
         });
     }
-    
-    Box.prototype.rotate=function(p,vTime){
-        var self=this;
-        var speed=vTime/p.x;
-        clearInterval(period1);
-        clearInterval(period2);
-        var period1=setInterval(function(){
-            if(self.Position.X==p.x){
-                clearInterval(period1);
-            }
-            else{
-                if(self.Position.X>0)
-                    self.Position.X-=1;
-                else
-                    self.Position.X+=1;
-                self.JQElement.css("transform",'translate(-50%,-50%) rotateX('+-Math.floor(self.Position.Y/2)+'deg) rotateY('+Math.floor(self.Position.X/2)+'deg)');
-            }
-            console.log(self.Position);
-        },speed);
-        var period2=setInterval(function(){
-            if(self.Position.Y==p.y){
-                clearInterval(period2);
-            }
-            else{
-                if(self.Position.Y>0)
-                    self.Position.Y-=1;
-                else
-                    self.Position.Y+=1;
-                self.JQElement.css("transform",'translate(-50%,-50%) rotateX('+-Math.floor(self.Position.Y/2)+'deg) rotateY('+Math.floor(self.Position.X/2)+'deg)');
-            }
-            console.log(self.Position);
-        },speed);
+    window.onload=function(){
+        var oBox=new Box($(".box"));
+        oBox.init();
     }
-    
-    
-    var oBox=new Box($(".box"));
-    oBox.init();
 }(jQuery,window,document);
